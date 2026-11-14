@@ -1,0 +1,6 @@
+src/
+target/
+catalog.yaml
+tsconfig.lib.json
+ng-package.json
+node_modules/

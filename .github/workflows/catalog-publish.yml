@@ -38,7 +38,9 @@ jobs:
 
       # Java / Maven Artefakt veröffentlichen
       - name: Publish Maven Catalog Package
-        run: mvn clean deploy -pl catalog -B -DaltDeploymentRepository=github::https://maven.pkg.github.com/SebPortfolio/lisa-contracts
+        run: mvn clean deploy -pl catalog -B
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Angular / npm Artefakt veröffentlichen
       - name: Install dependencies & Build Angular Lib

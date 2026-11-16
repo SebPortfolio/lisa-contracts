@@ -1,13 +1,16 @@
 name: Publish Catalog Contracts
 
 on:
-  push:
+  pull_request:
     branches: ["main"]
+    types: [closed]
     paths:
       - "catalog/**" # Läuft nur, wenn etwas auf main gemerged wurde
 
 jobs:
   publish:
+    # Läuft nur, wenn der PR tatsächlich gemerged wurde (nicht nur geschlossen)
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: read

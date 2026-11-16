@@ -7,11 +7,12 @@
     <parent>
         <groupId>de.sebportfolio.lisa</groupId>
         <artifactId>lisa-contracts-parent</artifactId>
-        <version>${revision}</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>lisa-catalog-api</artifactId>
+    <version>0.1.0</version>
 
     <properties>
         <service.name>catalog</service.name>

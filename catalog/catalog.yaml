@@ -42,7 +42,7 @@ components:
   schemas:
     ProductCategory:
       type: object
-      description: Produkt-Kategorie Item inklusive dem ersten Parent
+      description: Produkt-Kategorie inklusive dem ersten Parent
       required:
         - id
         - name
@@ -61,7 +61,7 @@ components:
 
     ParentProductCategory:
       type: object
-      description: Produkt-Kategorie Item ohne weiteres Parent
+      description: Produkt-Kategorie ohne weiteres Parent
       required:
         - id
         - name
@@ -86,7 +86,7 @@ components:
           type: string
           minLength: 3
           maxLength: 255
-          description: Name der neuen Produkt-Kategorien
+          description: Name der neuen Produkt-Kategorie
           example: Gemüse
         parentId:
           type: integer

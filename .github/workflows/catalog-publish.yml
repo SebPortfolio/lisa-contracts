@@ -1,0 +1,50 @@
+name: Publish Catalog Contracts
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "catalog/**" # Läuft nur, wenn etwas auf main gemerged wurde
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Um Pakete zu veröffentlichen
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          server-id: github
+          server-username: ${{ github.actor }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://npm.pkg.github.com"
+
+      # Java / Maven Artefakt veröffentlichen
+      - name: Publish Maven Catalog Package
+        run: mvn clean deploy -pl catalog -B
+
+      # Angular / npm Artefakt veröffentlichen
+      - name: Install dependencies & Build Angular Lib
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./catalog
+
+      - name: Publish npm Package
+        run: npm publish
+        working-directory: ./catalog/dist # Hier liegt das fertige Paket von ng-packagr
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

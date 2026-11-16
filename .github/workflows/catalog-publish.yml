@@ -10,8 +10,8 @@ on:
 
 jobs:
   publish:
-    # Läuft nur, wenn der PR tatsächlich gemerged wurde (nicht nur geschlossen)
-    if: github.event.pull_request.merged == true
+    # Läuft bei manuellem Start oder wenn der PR tatsächlich gemerged wurde (nicht nur geschlossen)
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: read

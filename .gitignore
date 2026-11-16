@@ -24,6 +24,7 @@ hs_err_pid*
 replay_pid*
 
 # Node
+node
 /node_modules
 */node_modules
 .npm/
@@ -50,3 +51,5 @@ dist/
 
 # Generated
 generated/
+*.tgz
+src

@@ -28,7 +28,7 @@ jobs:
           java-version: "17"
           server-id: github
           server-username: ${{ github.actor }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-password: ${{ secrets.CR_PAT }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

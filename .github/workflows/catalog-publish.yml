@@ -38,7 +38,8 @@ jobs:
 
       # Java / Maven Artefakt veröffentlichen
       - name: Publish Maven Catalog Package
-        run: mvn clean deploy -pl catalog -B
+        run: mvn clean deploy -B
+        working-directory: ./catalog
 
       # Angular / npm Artefakt veröffentlichen
       - name: Install dependencies & Build Angular Lib

@@ -27,6 +27,8 @@ jobs:
               console.error(`FEHLER: package.json enthält noch eine Dev-Version (${pkg.version})!`);
               process.exit(1);
             }
+            
+            console.log(`Gefundene package.json Version für catalog-api: ${pkg.version}`);
 
             // pom.xml prüfen (nur im Artifact-Kontext von catalog-api)
             const pomPath = "./catalog/pom.xml";

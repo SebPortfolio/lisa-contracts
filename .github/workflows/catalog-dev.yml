@@ -1,0 +1,97 @@
+name: Bump & Dev Publish
+
+on:
+  workflow_dispatch: # Aktiviert den "Run workflow"-Button
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "catalog/**.yaml" # Läuft nur, wenn etwas, nicht auf den main-Branch, in einer yaml-Datei, in catalog/** geändert wurde
+
+jobs:
+  bump-and-validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Zum Schreiben im PR
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      # Automatischer Version-Bump
+      - name: Run Version Bump Script
+        run: node catalog/scripts/bump-version-catalog.js
+
+      - name: Commit version bump to PR branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add catalog/package.json catalog/pom.xml
+          if git diff --staged --quiet; then
+            echo "No version changes to commit."
+          else
+            git commit -m "chore(catalog): auto-bump version for PR"
+            git push
+          fi
+
+      - name: Set up Java & Node and run Tests
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify Build
+        run: |
+          mvn clean test -pl catalog -B
+          npm ci --prefix catalog
+          npm run build --prefix catalog
+
+  publish-dev:
+    needs: [bump-and-validate] # Erst bauen/bumpen, dann publizieren
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Um Pakete zu veröffentlichen
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://npm.pkg.github.com"
+
+      # Java / Maven Artefakt veröffentlichen
+      - name: Publish Maven Catalog Package
+        run: mvn clean deploy -B
+        working-directory: ./catalog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Angular / npm Artefakt veröffentlichen
+      - name: Install dependencies & Build Angular Lib
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./catalog
+
+      - name: Publish npm Package
+        run: |
+          npm publish || echo "::warning::Paket-Version existiert bereits auf dem Server, überspringe Fehler."
+        working-directory: ./catalog/dist # Hier liegt das fertige Paket von ng-packagr
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>com.github.sebportfolio.lisa</groupId>
-        <artifactId>lisa-contracts-parent</artifactId>
+        <artifactId>contracts-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lisa-catalog-api</artifactId>
+    <artifactId>catalog-api</artifactId>
     <version>0.1.1</version>
 
     <properties>

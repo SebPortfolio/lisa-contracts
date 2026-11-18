@@ -1,20 +1,13 @@
 name: Stable Release & Cleanup
 
 on:
-  workflow_dispatch: # Aktiviert den "Run workflow"-Button
-  pull_request:
-    branches: ["main"]
-    types: [closed]
-    paths:
-      - "catalog/**.yaml" # Läuft nur, wenn 'Änderungen in einer yaml-Datei, in catalog/** auf main gemerged wurden
+  workflow_dispatch: # Wird manuell für den fertigen PR-Branch gestartet
 
 jobs:
   publish-stable:
-    # Läuft bei manuellem Start oder wenn der PR tatsächlich gemerged wurde (nicht nur geschlossen)
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # Um in den PR-Branch zu committen
       packages: write # Um Pakete zu veröffentlichen
 
     steps:
@@ -38,6 +31,17 @@ jobs:
             fs.writeFileSync(pomPath, pom, "utf8");
             console.log("Stabile Release-Version vorbereitet: " + pkg.version);
           '
+      - name: Commit stable versions to PR branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add catalog/package.json catalog/pom.xml
+          if git diff --staged --quiet; then
+            echo "No version changes to commit."
+          else
+            git commit -m "chore(catalog): finalize stable release version [skip ci]"
+            git push
+          fi
 
       - name: Set up Java
         uses: actions/setup-java@v5

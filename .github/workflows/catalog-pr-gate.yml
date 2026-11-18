@@ -1,0 +1,22 @@
+name: Verify No Dev Versions for Main
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "catalog/**"
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Check for -SNAPSHOT or -dev
+        run: |
+          if grep -q '"version":.*-dev' catalog/package.json || grep -q -- '-SNAPSHOT' catalog/pom.xml; then
+            echo "::error::In package.json oder pom.xml stehen noch Dev/Snapshot-Versionen! Bitte vor dem Merge den Release-Workflow für diesen Branch ausführen."
+            exit 1
+          fi
+          echo "Versionen sind stabil und bereit für main!"

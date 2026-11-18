@@ -15,7 +15,7 @@ jobs:
       - name: Checkout PR
         uses: actions/checkout@v4
 
-      - name: Check for Dev or Snapshot Versions
+      - name: Check for Dev or Snapshot and equal Versions
         run: |
           node -e '
             const fs = require("fs");
@@ -43,11 +43,16 @@ jobs:
               process.exit(1);
             }
 
-            const catalogVersion = match[1];
-            console.log(`Gefundene pom.xml Version für catalog-api: ${catalogVersion}`);
+            const pomCatalogVersion = match[1];
+            console.log(`Gefundene pom.xml Version für catalog-api: ${pomCatalogVersion}`);
 
-            if (catalogVersion.includes("-SNAPSHOT")) {
-              console.error(`FEHLER: catalog-api in pom.xml enthält noch ein -SNAPSHOT (${catalogVersion})!`);
+            if (pomCatalogVersion.includes("-SNAPSHOT")) {
+              console.error(`FEHLER: pom.xml enthält noch ein -SNAPSHOT (${pomCatalogVersion})!`);
+              process.exit(1);
+            }
+
+            if(pkg.version != pomCatalogVersion) {
+              console.error(`FEHLER: Versionen in package.json und pom.xml stimmen nicht überein!`);
               process.exit(1);
             }
 

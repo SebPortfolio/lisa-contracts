@@ -1,6 +1,6 @@
 {
   "name": "@sebportfolio/lisa-catalog-api",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "scripts": {
     "clean": "node -e \"fs.rmSync('src', { recursive: true, force: true }); fs.rmSync('dist', { recursive: true, force: true });\"",
     "generate": "npx @openapitools/openapi-generator-cli generate -i ./catalog.yaml -g typescript-angular -o ./src --additional-properties=serviceSuffix=Api,modelSuffix=Wdto,ngVersion=18",

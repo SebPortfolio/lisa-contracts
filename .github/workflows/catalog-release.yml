@@ -78,31 +78,37 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const packageName = "catalog-api";
+            const scope = "sebportfolio";
+            const packageName = "lisa-catalog-api";
+            const fullPackageName = `${scope}%2F${packageName}`; // Ergibt: sebportfolio%2Flisa-catalog-api
 
-            // Alle Versionen des Pakets abrufen
-            const response = await github.rest.packages.getAllPackageVersionsForPackageOwner({
-              package_type: 'npm',
-              package_name: packageName,
-              owner: context.repo.owner,
-            });
-
-            // Filtern nach Versionen, die "-dev" im Namen tragen
-            const devVersions = response.data.filter(version => 
-              version.metadata.npm.version.includes('-dev')
-            );
-
-            console.log(`Gefundene Dev-Versionen zum Löschen: ${devVersions.length}`);
-
-            // Schleife über alle Dev-Versionen und löschen
-            for (const ver of devVersions) {
-              console.log(`Lösche Version ID ${ver.id} (${ver.metadata.npm.version})...`);
-              await github.rest.packages.deletePackageVersionForPackageOwner({
+            try {
+              // Alle Versionen des Pakets abrufen
+              const response = await github.rest.packages.getAllPackageVersionsForPackageOwner({
                 package_type: 'npm',
-                package_name: packageName,
+                package_name: fullPackageName,
                 owner: context.repo.owner,
-                package_version_id: ver.id
               });
+
+              // Filtern nach Versionen, die "-dev" im Namen tragen
+              const devVersions = response.data.filter(version => 
+                version.metadata.npm.version.includes('-dev')
+              );
+
+              console.log(`Gefundene Dev-Versionen zum Löschen: ${devVersions.length}`);
+
+              // Schleife über alle Dev-Versionen und löschen
+              for (const ver of devVersions) {
+                console.log(`Lösche Version ID ${ver.id} (${ver.metadata.npm.version})...`);
+                await github.rest.packages.deletePackageVersionForPackageOwner({
+                  package_type: 'npm',
+                  package_name: fullPackageName,
+                  owner: context.repo.owner,
+                  package_version_id: ver.id
+                });
+              }
+            } catch (error) {
+              console.error("Fehler beim Cleanup: " + error.message);
             }
             console.log("Cleanup erfolgreich abgeschlossen!");
         env:

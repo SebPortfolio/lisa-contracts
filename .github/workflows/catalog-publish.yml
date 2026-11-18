@@ -26,9 +26,6 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
-          server-id: github
-          server-username: ${{ github.actor }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -38,7 +35,10 @@ jobs:
 
       # Java / Maven Artefakt veröffentlichen
       - name: Publish Maven Catalog Package
-        run: mvn clean deploy -pl catalog -B
+        run: mvn clean deploy -B
+        working-directory: ./catalog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Angular / npm Artefakt veröffentlichen
       - name: Install dependencies & Build Angular Lib

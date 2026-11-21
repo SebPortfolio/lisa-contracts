@@ -14,23 +14,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Stabilize Versions for Release
-        run: |
-          node -e '
-            const fs = require("fs");
-            // package.json stabilisieren
-            const pkgPath = "./catalog/package.json";
-            const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-            pkg.version = pkg.version.split("-dev")[0];
-            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
-
-            // pom.xml stabilisieren
-            const pomPath = "./catalog/pom.xml";
-            let pom = fs.readFileSync(pomPath, "utf8");
-            pom = pom.replace(/(<artifactId>catalog-api<\/artifactId>\s*<version>)(.*?)(-SNAPSHOT)(<\/version>)/, "$1$2$4");
-            fs.writeFileSync(pomPath, pom, "utf8");
-            console.log("Stabile Release-Version vorbereitet: " + pkg.version);
-          '
+      - name: Run Stabilize Script for Release
+        run: node catalog/scripts/stabilize-release-catalog.js
       - name: Commit stable versions to PR branch
         run: |
           git config --global user.name "github-actions[bot]"

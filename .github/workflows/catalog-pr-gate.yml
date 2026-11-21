@@ -1,0 +1,60 @@
+name: Verify No Dev Versions for Main
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "catalog/**"
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Check for Dev or Snapshot and equal Versions
+        run: |
+          node -e '
+            const fs = require("fs");
+
+            // package.json prüfen
+            const pkgPath = "./catalog/package.json";
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+            if (pkg.version.includes("-dev")) {
+              console.error(`FEHLER: package.json enthält noch eine Dev-Version (${pkg.version})!`);
+              process.exit(1);
+            }
+            
+            console.log(`Gefundene package.json Version für catalog-api: ${pkg.version}`);
+
+            // pom.xml prüfen (nur im Artifact-Kontext von catalog-api)
+            const pomPath = "./catalog/pom.xml";
+            const pom = fs.readFileSync(pomPath, "utf8");
+            
+            // Sucht exakt nach der Version im Block der catalog-api Artifact-ID
+            const regex = /<artifactId>catalog-api<\/artifactId>\s*<version>(.*?)<\/version>/;
+            const match = pom.match(regex);
+
+            if (!match) {
+              console.error("FEHLER: Konnte catalog-api und dessen Version in pom.xml nicht finden!");
+              process.exit(1);
+            }
+
+            const pomCatalogVersion = match[1];
+            console.log(`Gefundene pom.xml Version für catalog-api: ${pomCatalogVersion}`);
+
+            if (pomCatalogVersion.includes("-SNAPSHOT")) {
+              console.error(`FEHLER: pom.xml enthält noch ein -SNAPSHOT (${pomCatalogVersion})!`);
+              process.exit(1);
+            }
+
+            if(pkg.version != pomCatalogVersion) {
+              console.error(`FEHLER: Versionen in package.json und pom.xml stimmen nicht überein!`);
+              process.exit(1);
+            }
+
+            console.log("Alle Versionen sind stabil und bereit für main!");
+          '

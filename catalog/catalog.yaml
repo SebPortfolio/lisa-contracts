@@ -94,3 +94,4 @@ components:
           minimum: 0
           description: eindeutige Idenifikation der übergeordneten für die neue Produkt-Kategorie
           example: 3
+# workflow test
